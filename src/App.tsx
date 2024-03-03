@@ -8,7 +8,7 @@ const Slider: Component<{
   oninput: (value: number) => void;
   colorFn: (value: number) => string;
 }> = (props) => {
-  const width = 200;
+  const width = 300;
   const valueSteps = 30;
   const thumbWidth = 8;
   const scaleValue = props.max / valueSteps;
@@ -16,26 +16,26 @@ const Slider: Component<{
   const gradient = () => Array.from({ length: valueSteps }, (_n, i) => props.colorFn(i * scaleValue)).join(', ');
   return (
     <div
-      class="relative h-3 bg-blue-400 rounded-full border-2 border-zinc-950 shadow focus-within:border-zinc-300"
+      class="relative h-4 bg-blue-400 rounded-full border-2 border-zinc-950 shadow"
       style={{
         'width': `${width}px`,
         'background-image': `linear-gradient(to right, ${gradient()})`
       }}
     >
-      <div
-        class="relative h-4 w-1 rounded-full bg-white -top-1 shadow"
-        style={{
-          transform: `translateX(${props.value / scaleThumb}px)`
-        }}
-      />
       <input
         type="range"
-        class="absolute inset-0 opacity-0"
+        class="peer absolute inset-0 opacity-0 z-10"
         min={props.min}
         max={props.max}
         step={1}
         value={props.value}
         oninput={(e) => props.oninput(e.currentTarget.valueAsNumber ?? 0)}
+      />
+      <div
+        class="relative h-5 w-2 rounded-full bg-white -top-1 shadow outline outline-2 outline-offset-2 outline-transparent peer-focus:outline-sky-500"
+        style={{
+          transform: `translateX(${props.value / scaleThumb}px)`
+        }}
       />
     </div>
   );
@@ -52,7 +52,7 @@ const Hsl: Component<{
 
   return (
     <div class="flex gap-4 items-center">
-      <div class="relative h-20 w-20 rounded overflow-clip">
+      <div class="relative h-20 w-20 rounded overflow-clip outline outline-offset-4 outline-2 outline-transparent focus-within:outline-sky-500">
         <div class="absolute w-full h-full" style={{
           'background-color': `hsl(${hue()} ${saturation()}% ${lum()}%)`
         }} />
@@ -60,7 +60,7 @@ const Hsl: Component<{
           type="color"
           class="absolute w-full h-full opacity-0"
           onInput={(e) => {
-            const { h, s, l } = hexToHsl(e.currentTarget.value);
+            const [h, s, l] = hexToHsl(e.currentTarget.value);
             setHue(h);
             setSaturation(s);
             setLum(l);
@@ -79,7 +79,7 @@ const Hsl: Component<{
           />
           <input
             type="number"
-            class="text-white w-12 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0"
+            class="text-white w-14 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0 px-1"
             value={hue()}
             min={0}
             max={360}
@@ -97,7 +97,7 @@ const Hsl: Component<{
           />
           <input
             type="number"
-            class="text-white w-12 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0"
+            class="text-white w-14 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0 px-1"
             value={saturation()}
             min={0}
             max={100}
@@ -116,7 +116,7 @@ const Hsl: Component<{
           />
           <input
             type="number"
-            class="text-white w-12 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0"
+            class="text-white w-14 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0 px-1"
             value={lum()}
             min={0}
             max={100}

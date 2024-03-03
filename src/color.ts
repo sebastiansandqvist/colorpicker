@@ -1,13 +1,24 @@
 type Color = [number, number, number];
 
-export function hexToRgb(hex: string) {
+export function hexToRgb(hex: string): Color {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
-  return [r, g, b] as Color;
+  return [r, g, b];
 }
 
-export function hexToHsl(hex: string) {
+// function rgbToLinearRgb(rgb: Color): Color {
+//   return rgb.map(channel => {
+//     const c = channel / 255;
+//     return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+//   }) as Color;
+// }
+
+// function linearRgbToOklab(rgb: Color) {
+//   TODO: maybe support OKLCH
+// }
+
+export function hexToHsl(hex: string): Color {
   const [r, g, b] = hexToRgb(hex).map((n) => n / 255) as Color;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -29,9 +40,9 @@ export function hexToHsl(hex: string) {
     h /= 6;
   }
 
-  return {
-    h: Math.round(h * 360),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100),
-  };
+  return [
+    Math.round(h * 360),
+    Math.round(s * 100),
+    Math.round(l * 100),
+  ];
 }

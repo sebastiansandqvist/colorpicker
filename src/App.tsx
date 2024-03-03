@@ -1,62 +1,138 @@
 import { createSignal, type Component } from "solid-js";
+import { hexToHsl } from "./color";
 
-export const App: Component = () => {
-  const [hue, setHue] = createSignal(220);
-  const [saturation, setSaturation] = createSignal(55);
-  const [lum, setLum] = createSignal(50);
+const Slider: Component<{
+  min: number;
+  max: number;
+  value: number;
+  oninput: (value: number) => void;
+  colorFn: (value: number) => string;
+}> = (props) => {
+  const width = 200;
+  const valueSteps = 30;
+  const thumbWidth = 8;
+  const scaleValue = props.max / valueSteps;
+  const scaleThumb = props.max / (width - thumbWidth);
+  const gradient = () => Array.from({ length: valueSteps }, (_n, i) => props.colorFn(i * scaleValue)).join(', ');
+  return (
+    <div
+      class="relative h-3 bg-blue-400 rounded-full border-2 border-zinc-950 shadow focus-within:border-zinc-300"
+      style={{
+        'width': `${width}px`,
+        'background-image': `linear-gradient(to right, ${gradient()})`
+      }}
+    >
+      <div
+        class="relative h-4 w-1 rounded-full bg-white -top-1 shadow"
+        style={{
+          transform: `translateX(${props.value / scaleThumb}px)`
+        }}
+      />
+      <input
+        type="range"
+        class="absolute inset-0 opacity-0"
+        min={props.min}
+        max={props.max}
+        step={1}
+        value={props.value}
+        oninput={(e) => props.oninput(e.currentTarget.valueAsNumber ?? 0)}
+      />
+    </div>
+  );
+}
+
+const Hsl: Component<{
+  h: number;
+  s: number;
+  l: number;
+}> = (props) => {
+  const [hue, setHue] = createSignal(props.h);
+  const [saturation, setSaturation] = createSignal(props.s);
+  const [lum, setLum] = createSignal(props.l);
 
   return (
-    <div class="bg-zinc-900 text-white font-mono p-8">
-      <div class="flex gap-4 items-center">
-        {/* <input type="color" /> */}
-        <div class="h-16 w-16 rounded" style={{
+    <div class="flex gap-4 items-center">
+      <div class="relative h-20 w-20 rounded overflow-clip">
+        <div class="absolute w-full h-full" style={{
           'background-color': `hsl(${hue()} ${saturation()}% ${lum()}%)`
         }} />
-        <div>
-          <label class="flex gap-2">
-            H
-            <input
-              type="range"
-              min={0}
-              max={360}
-              step={1}
-              value={hue()}
-              oninput={(e) => {
-                setHue(e.currentTarget.valueAsNumber);
-              }}
-            />
-            {hue()}
-          </label>
-          <label class="flex gap-2">
-            S
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={saturation()}
-              oninput={(e) => {
-                setSaturation(e.currentTarget.valueAsNumber);
-              }}
-            />
-            {saturation()}
-          </label>
-          <label class="flex gap-2">
-            L
-            <input
-              type="range"
-              min={0}
-              max={100}
-              step={1}
-              value={lum()}
-              oninput={(e) => {
-                setLum(e.currentTarget.valueAsNumber);
-              }}
-            />
-            {lum()}
-          </label>
-        </div>
+        <input
+          type="color"
+          class="absolute w-full h-full opacity-0"
+          onInput={(e) => {
+            const { h, s, l } = hexToHsl(e.currentTarget.value);
+            setHue(h);
+            setSaturation(s);
+            setLum(l);
+          }}
+        />
+      </div>
+      <div class="grid gap-0.5">
+        <label class="flex items-center gap-2">
+          H
+          <Slider
+            min={0}
+            max={360}
+            value={hue()}
+            oninput={(value) => setHue(value)}
+            colorFn={(value) => `hsl(${value} ${saturation()}% ${lum()}%)`}
+          />
+          <input
+            type="number"
+            class="text-white w-12 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0"
+            value={hue()}
+            min={0}
+            max={360}
+            oninput={(e) => setHue(e.currentTarget.valueAsNumber || 0)}
+          />
+        </label>
+        <label class="flex items-center gap-2">
+          S
+          <Slider
+            min={0}
+            max={100}
+            value={saturation()}
+            oninput={(value) => setSaturation(value)}
+            colorFn={(value) => `hsl(${hue()} ${value}% ${lum()}%)`}
+          />
+          <input
+            type="number"
+            class="text-white w-12 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0"
+            value={saturation()}
+            min={0}
+            max={100}
+            step={1}
+            oninput={(e) => setSaturation(e.currentTarget.valueAsNumber || 0)}
+          />
+        </label>
+        <label class="flex items-center gap-2">
+          L
+          <Slider
+            min={0}
+            max={100}
+            value={lum()}
+            oninput={(value) => setLum(value)}
+            colorFn={(value) => `hsl(${hue()} ${saturation()}% ${value}%)`}
+          />
+          <input
+            type="number"
+            class="text-white w-12 rounded shadow-inner bg-transparent focus:bg-zinc-950 border border-zinc-500 focus:border-sky-500 outline-0"
+            value={lum()}
+            min={0}
+            max={100}
+            step={1}
+            oninput={(e) => setLum(e.currentTarget.valueAsNumber || 0)}
+          />
+        </label>
       </div>
     </div>
   );
 };
+
+export const App: Component = () => (
+  <div class="grid gap-12">
+    <Hsl h={220} s={50} l={50} />
+    <Hsl h={150} s={40} l={50} />
+    <Hsl h={320} s={40} l={50} />
+  </div>
+);

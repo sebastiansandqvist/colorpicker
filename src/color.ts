@@ -46,3 +46,25 @@ export function hexToHsl(hex: string): Color {
     Math.round(l * 100),
   ];
 }
+
+function hslToRgb([h, _s, _l]: Color): Color {
+  const s = _s / 100;
+  const l = _l / 100;
+
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(255 * color);
+  };
+
+  return [f(0), f(8), f(4)];
+}
+
+function rgbToHex(rgb: Color): string {
+  return rgb.map(component => component.toString(16).padStart(2, '0')).join('');;
+}
+
+export function hslToHex(hsl: Color) {
+  return rgbToHex(hslToRgb(hsl));
+}

@@ -1,5 +1,5 @@
-import { createSignal, type Component } from "solid-js";
-import { hexToHsl, hslToHex } from "./color";
+import { createSignal, type Component, For } from "solid-js";
+import { hexToHsl, hslToHex, type Color } from "./color";
 
 const Slider: Component<{
   min: number;
@@ -133,10 +133,58 @@ const Hsl: Component<{
   );
 };
 
-export const App: Component = () => (
-  <div class="grid gap-12">
-    <Hsl h={220} s={50} l={50} />
-    <Hsl h={150} s={40} l={50} />
-    <Hsl h={320} s={40} l={50} />
-  </div>
-);
+function random(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
+function randomColor(): Color {
+  return [random(360), random(100), random(100)];
+}
+
+function findColors(input: string): Color[] | undefined {
+  const colors: Color[] = [];
+  const regex = /#(?:[0-9a-fA-F]{3}){1,2}(?:[0-9a-fA-F]{2})?/g;
+  const matches = input.match(regex);
+  return matches?.map((match) => hexToHsl(match));
+}
+
+function removeDuplicateColors(colors: Color[]): Color[] {
+  const uniqueTuples = new Set(colors.map((color) => JSON.stringify(color)));
+  return Array.from(uniqueTuples).map(tuple => JSON.parse(tuple));
+}
+
+export const App: Component = () => {
+  const [colors, setColors] = createSignal<Color[]>([]);
+  const [input, setInput] = createSignal('');
+
+  const detectColors = () => {
+    const detectedColors = findColors(input());
+    if (detectedColors) {
+      setColors(removeDuplicateColors(detectedColors));
+    }
+  }
+
+  return (
+    <>
+      <div class="grid gap-12">
+        <For each={colors()}>
+          {([h, s, l]) => <Hsl h={h} s={s} l={l} />}
+        </For>
+      </div>
+      <button
+        onclick={() => {
+          setColors((prior) => [...prior, randomColor()])
+        }}
+      >+</button>
+      <textarea
+        class="w-full text-white rounded shadow-inner shadow-black bg-transparent focus:bg-zinc-950 border border-zinc-800 focus:border-sky-500 outline-0 px-1"
+        value={input()}
+        oninput={(e) => setInput(e.currentTarget.value)}
+        rows={5}
+      />
+      <button onclick={detectColors}>
+        detect colors
+      </button>
+    </>
+  );
+};

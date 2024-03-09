@@ -1,9 +1,12 @@
-type Color = [number, number, number];
+export type Color = [number, number, number];
 
-export function hexToRgb(hex: string): Color {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+export function hexToRgb(hexRaw: string): Color {
+  const hex = hexRaw.length === 4
+    ? hexRaw[1]! + hexRaw[1] + hexRaw[2]! + hexRaw[2] + hexRaw[3]! + hexRaw[3]
+    : hexRaw.slice(1);
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
   return [r, g, b];
 }
 
